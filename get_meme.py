@@ -1,5 +1,7 @@
 import praw
 import os
+import re
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,4 +17,20 @@ reddit = praw.Reddit(
     username="GameOfShadows",
     password=password
 )
+
+SUBREDDIT = "dankmemes"
+
+subreddit = reddit.subreddit(SUBREDDIT)
+hot = subreddit.hot(limit=10)
+
+pattern = re.compile("http.*i\.redd\.it\/.*\.(gif|png|jpg)")
+
+for post in hot:
+    post_url = post.url
+    if re.search(pattern, post_url):
+        print(post.title, "\n            ", post_url)
+        img_data = requests.get(post_url).content
+        img_name = post_url[18:]
+        with open(img_name, "wb") as f:
+            f.write(img_data)
 
